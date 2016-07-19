@@ -1,0 +1,70 @@
+.listen-live, #block-ob-player-ob-player-listen-live {
+  position: absolute;
+  right: 3em;
+  top: -1em;
+}
+.listen-live-button {
+  background: $link-color;
+  border-radius: .25em;
+  color: #fff;
+  display: inline-block;
+  font-family: $condensed;
+  font-size: 2em;
+  padding: .2em .25em;
+  text-transform: uppercase;
+  transition: background .5s;
+
+  .fa-play-circle {
+    color: $feather-grey;
+  }
+  .station-logo {
+    //background: url("../images/logo-30h.png") 0 0 no-repeat;
+    display: inline-block;
+    font-size: 1px;
+    height: 30px;
+    overflow: hidden;
+    //text-indent: 100px;
+    vertical-align: bottom;
+    white-space: nowrap;
+    width: 82px;
+  }
+
+  &:hover {
+    background: $dark-grey;
+    color: #fff;
+    text-decoration: none;
+
+    .fa-play-circle {
+      color: $link-color;
+    }
+  }
+}
+@media all and (max-width: 480px) {
+  .listen-live, #block-ob-player-ob-player-listen-live {
+    right: 2.75em;
+    top: 1em;
+
+    p {
+      margin: 0;
+    }
+  }
+  .listen-live-button {
+    font-size: x-large;
+
+    .station-logo {
+      display: none;
+    }
+  }
+}
+.ob-player-now-playing {
+  background: $link-color;
+  padding: 2px 2px;
+  margin-bottom: 4px;
+}
+.ob-player-now-playing .track {
+  font-size: 1.2em;
+}
+.ob-player-now-playing .recent {
+  float: right;
+  color: black;
+}

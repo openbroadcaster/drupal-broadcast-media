@@ -1,0 +1,59 @@
+.sidebars {
+  .block {
+    background: $block-background;
+    margin-bottom: .75em;
+    padding: .5em .75em;
+
+    p,
+    .menu {
+      margin: .5em 0;
+    }
+    .block-title {
+      color: $openbroadcaster-blue;
+    }
+    .menu {
+      padding: 0 0 0 1em;
+    }
+  }
+  .block--clear {
+    background: none;
+    color: #fff;
+  }
+  .block--dark {
+    background: url("../images/bg-block--dark.png") 0 0 repeat;
+    background: rgba($block-background-dark, .5);
+    color: #fff;
+
+    a {
+      color: $feather-grey;
+      transition: color .5s;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+    .block-title {
+      color: #fff;
+    }
+  }
+}
+@media all and (max-width: 480px) {
+  .sidebars {
+    margin-top: 1em;
+
+    .block--dark {
+      background: $block-background-dark;
+    }
+    .sidebar {
+      padding: 0;
+    }
+  }
+}
+@media all and (max-width: 700px) {
+
+}
+@media all and (min-width: 481px) and (max-width: 935px) {
+  .sidebars {
+    font-size: small;
+  }
+}

@@ -1,0 +1,227 @@
+<?php
+/**
+ * Implements hook_block_info().
+ */
+function ob_schedule_block_info() {
+  $blocks = array();
+  $blocks['ob_schedule'] = array(
+    'info'       => t('OpenBroadcaster program schedule'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages'      => "<front>",
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function ob_schedule_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'ob_schedule' :
+      $block['subject'] = NULL;
+      $block['content'] = ob_schedule_display();
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Implements hook_cron.
+ */
+function ob_schedule_cron() {
+  ob_schedule_import();
+}
+
+/**
+ * Display the programming schedule for the week.
+ */
+function ob_schedule_display() {
+  // Calculate the start and end times for the schedule
+  if (isset($_GET['schedule']) && $_GET['schedule'] == 'next-week') {
+    $schedule_start = strtotime('next sunday midnight');
+  }
+  else {
+    $schedule_start = strtotime('next sunday midnight') - 604800;
+  }
+  $schedule_end = $schedule_start + (60 * 60 * 24 * 7);
+
+  $current_time    = REQUEST_TIME;
+  $is_current_week = ($current_time >= $schedule_start && $current_time <= $schedule_end);
+  $current_day     = $is_current_week ? date('N') : 7;
+
+  // Loop through the scheduled programs
+  $query = db_select('ob_schedule', 's');
+  $query->leftJoin('node', 'n', "n.title = s.name AND n.status = 1 AND n.type = 'program'");
+  $query
+    ->fields('s', array('duration', 'start', 'name', 'description'))
+    ->fields('n', array('nid'))
+    ->condition('s.start', $schedule_start, '>')
+    ->condition('s.start', $schedule_end, '<')
+    ->orderBy('s.start', 'ASC');
+  $result = $query->execute();
+
+  $schedule = array();
+  foreach ($result as $record) {
+    $day = date('N', $record->start);
+    $schedule[$day][] = $record;
+  }
+
+  $days         = array('', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun');
+  $day_numbers  = array(7, 1, 2, 3, 4, 5, 6);
+  $previous_day = 0;
+  $output       = '<div class="schedule">';
+
+  if ($is_current_week) {
+    $output .= '<div class="schedule-navigation pinned align-right"><a href="?schedule=next-week">' . t('See next week’s schedule') . ' <i class="fa fa-arrow-right"></i></a></div>';
+  }
+  else {
+    $output .= '<div class="schedule-navigation pinned align-right"><a href="?schedule=this-week"><i class="fa fa-arrow-left"></i> ' . t('See this week’s schedule') . '</a></div>';
+  }
+
+  $the_date = $schedule_start;
+  $output  .= '<div class="schedule-day-tabs">';
+  foreach ($day_numbers as $day) {
+    $output  .= '<h2 class="schedule-day-tab' . ($day == $current_day ? ' active' : '') . ($day == 6 ? ' last' : '') . '" data-target="schedule-day-' . $day . '">' . $days[$day] . '<div class="schedule-day-date">' . date('j M', $the_date) . '</div></h2>';
+    $the_date = $the_date + (60 * 60 * 24);
+  }
+  $output .= '</div>';
+
+  foreach ($day_numbers as $day) {
+    $output .= '<div class="schedule-day schedule-day-' . $day . ($day == $current_day ? ' active' : '') . '">';
+    $output .= '<div class="schedule-day-programs">';
+
+    if (isset($schedule[$day])) {
+      foreach ($schedule[$day] as $program) {
+        $node     = NULL;
+        $host     = '';
+        $longdesc = '';
+        $image    = '<div class="program-image-placeholder"></div>';
+        if ($program->nid) {
+          $node = node_load($program->nid);
+          if (isset($node->field_program_host[$node->language][0]) && drupal_strlen($node->field_program_host[$node->language][0]['value'])) {
+            $host = ' <span class="program-host">Hosted by ' . $node->field_program_host[$node->language][0]['value'] . '</span>';
+          }
+          if (isset($node->body[$node->language][0]) && drupal_strlen($node->body[$node->language][0]['value'])) {
+            $longdesc = strip_tags($node->body[$node->language][0]['value']);
+            $longdesc = text_summary($longdesc, NULL, 550);
+          }
+          if (isset($node->field_program_image[$node->language][0])) {
+            $config = array(
+              'style_name' => 'schedule',
+              'path'       => $node->field_program_image[$node->language][0]['uri'],
+              'height'     => NULL,
+              'width'      => NULL,
+             );
+            $image = theme_image_style($config);
+          }
+        }
+        $program_start      = date('i', $program->start) > 0 ? date('g:i A', $program->start) : date('g A', $program->start);
+        $program_end_time   = $program->start + $program->duration;
+        $program_end        = date('i', $program_end_time) > 0 ? date('g:i A', $program_end_time) : date('g A', $program_end_time);
+        $is_current_program = ($day == $current_day) && (REQUEST_TIME >= $program->start && REQUEST_TIME <= $program_end_time);
+
+        $output .= '<div class="schedule-day-program' . ($is_current_program ? ' active' : '') . '">';
+        $output .= '<div class="program-time">' . $program_start . '–' . $program_end;
+        if ($is_current_program) {
+          $output .= '<div class="program-listen"><i class="fa fa-volume-up" title="Listen live!"></i></div>';
+        }
+        $output .= '</div>';
+        if (!empty($image)) {
+          $output .= '<div class="program-image">';
+          if ($node) {
+            $output .= '<a href="' . url('node/' . $node->nid) . '">';
+          }
+          $output .= $image;
+          if ($node) {
+            $output .= '</a>';
+          }
+          $output .= '</div>';
+        }
+        $output .= '<div class="program-details">';
+        $output .= '<div class="program-title"><span class="program-name">';
+        if ($node) {
+          $output .= '<a href="' . url('node/' . $node->nid) . '">';
+        }
+        $output .= $program->name;
+        if ($node) {
+          $output .= '</a>';
+        }
+        $output .= '</span>' . $host . '</div>';
+        $output .= '<div class="program-description">' . $program->description . '</div>';
+        if (drupal_strlen($longdesc)) {
+          $output .= '<div class="program-longdesc"><p>' . $longdesc . '</p><p class="read-more"><a href="' . url('node/' . $node->nid) . '">Read more <i class="fa fa-arrow-right"></i></a></p></div>';
+        }
+        $output .= '</div>'; // Details
+        $output .= '</div>'; // Program
+      }
+    }
+    else {
+      $output .= '<div class="schedule-day-program">' . t('No programs scheduled for this day.') . '</div>';
+    }
+
+    $output .= '</div>'; // schedule-day-programs
+    $output .= '</div>'; // schedule-day
+  }
+
+  if ($is_current_week) {
+    $output .= '<div class="schedule-navigation align-right"><a href="?schedule=next-week">' . t('See next week’s schedule') . ' <i class="fa fa-arrow-right"></i></a></div>';
+  }
+  else {
+    $output .= '<div class="schedule-navigation align-right"><a href="?schedule=this-week"><i class="fa fa-arrow-left"></i> ' . t('See this week’s schedule') . '</a></div>';
+  }
+
+  $output .= '</div>'; // schedule
+
+  return $output;
+}
+
+/**
+ * Import schedules from the OpenBroadcaster API.
+ */
+function ob_schedule_import() {
+  $login = ob_api_login();
+  if (!$login)
+    return;
+
+  // Get shows
+  $scheduled_start = strtotime('yesterday midnight');
+  $data = array(
+    'i'      => $login->data->id,
+    'k'      => $login->data->key,
+    'start'  => $scheduled_start,
+    'end'    => strtotime('+14 days midnight'),
+    'device' => variable_get('ob_api_device', '1')
+  );
+  $schedule = json_decode(ob_api_request('Schedule', 'shows', $data));
+
+  // Remove existing data from 12AM today onwards
+  db_delete('ob_schedule')
+    ->condition('start', $scheduled_start, '>=')
+    ->execute();
+
+  // Insert latest data
+  if (count($schedule->data)) {
+    $values = array();
+    foreach ($schedule->data as $show) {
+      $values[] = array(
+        'duration'    => intval($show->duration),
+        'start'       => intval($show->start),
+        'name'        => $show->name,
+        'description' => isset($show->description) ? $show->description : '',
+        'owner'       => $show->owner,
+        'stamp'       => REQUEST_TIME,
+      );
+    }
+    $query = db_insert('ob_schedule')->fields(array('duration', 'start', 'name', 'description', 'owner', 'stamp'));
+    foreach ($values as $record) {
+      $query->values($record);
+    }
+    $query->execute();
+  }
+}

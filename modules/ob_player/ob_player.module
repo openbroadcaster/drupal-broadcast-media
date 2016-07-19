@@ -1,0 +1,158 @@
+<?php
+//
+// HOOKS
+//
+
+/**
+ * Implementation of hook_menu().
+ */
+function ob_player_menu() {
+  $items['live'] = array(
+    'title'            => 'Listen live',
+    'description'      => 'Listen to the live stream from CFET Radio',
+    'access arguments' => array('access content'),
+    'page callback'    => 'ob_player_page',
+    'type'             => MENU_CALLBACK,
+  );
+  $items['now-playing'] = array(
+    'title'            => 'Now playing',
+    'description'      => 'Local retrieval of the openbroadcaster track info',
+    'access arguments' => array('access content'),
+    'page callback'    => 'ob_track_info',
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['admin/config/system/openbroadcasterplayer'] = array(
+    'title'            => 'OpenBroadcaster Web Player',
+    'description'      => 'Manage the settings for the web player.',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('ob_player_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'type'             => MENU_NORMAL_ITEM,
+    'file'             => 'ob_player.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function ob_player_block_info() {
+  $blocks = array();
+  $blocks['ob_player_listen_live'] = array(
+    'info'       => t('OpenBroadcaster listen live button'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'header',
+    'visibility' => BLOCK_VISIBILITY_NOTLISTED,
+    'pages'      => "",
+  );
+  $blocks['ob_player_now_playing'] = array(
+    'info'       => t('OpenBroadcaster now playing'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'highlighted',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages'      => "<front>",
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function ob_player_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'ob_player_listen_live':
+      $block['subject'] = NULL;
+      $block['content'] = ob_player_listen_live();
+      break;
+
+    case 'ob_player_now_playing':
+      $block['subject'] = NULL;
+      $block['content'] = ob_player_display_now_playing();
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function ob_player_theme() {
+  return array(
+    'live_player' => array(
+      'template' => 'live_player',
+      'path'     => drupal_get_path('module', 'ob_player') . '/templates',
+    ),
+  );
+}
+
+//
+// CALLBACKS
+//
+
+function ob_player_listen_live() {
+  drupal_add_js(drupal_get_path('module', 'ob_player') . '/js/listenlive.js');
+
+  $output = '';
+  $output .= '<p><a href="' . variable_get('ob_player_url', '') . '" class="listen-live-button">';
+  $output .= 'Listen Live <i class="fa fa-play-circle"></i> <span class="station-logo"><img src="' . variable_get('ob_player_logo', '') . '" alt="' . variable_get('ob_player_station', '') . '" " border="0" /></span>';
+  $output .= '</a></p>';
+
+  return $output;
+}
+
+function ob_player_page() {
+  echo theme('live_player', array(
+    'ob_player_url' => variable_get('ob_player_url', ''),
+    'ob_player_station' => variable_get('ob_player_station', ''),
+    'ob_player_logo' => variable_get('ob_player_logo', ''),
+  ));
+  exit(0);
+}
+
+function ob_track_info() {
+  ob_clean();	// this should clear the UTF-8 BOM that sometimes is outputted, which can prevent json decode of data
+  echo ob_api_request('Device', 'now_playing', array('id' => variable_get('ob_api_device', '1')));
+}
+
+function ob_player_display_now_playing() {
+  return '<div class="ob-player-now-playing">Now Playing: <span class="track">Updating...</span></div>';
+  #<a class="recent" href="'.base_path().'recently-played">(Recently Played)</a>
+}
+
+function ob_player_display_now_playing_old() {
+  // Log in
+/*
+  $data = array(
+    'username' => variable_get('ob_api_username', ''),
+    'password' => variable_get('ob_api_password', '')
+  );
+  $login = json_decode(ob_api_request('Account', 'login', $data));
+*/
+
+  // Get recently uploaded media
+  $data = array(
+    //'i'   => $login->data->id,
+    //'k'   => $login->data->key,
+    'id'  => variable_get('ob_api_device', '1')
+  );
+  $response = json_decode(ob_api_request('Device', 'now_playing', $data));
+
+  $media = $response->data->media;
+  drupal_set_message(print_r($response->data, true));
+  if ($media->artist || $media->title)
+    $output = '<div class="ob-player-now-playing">Now Playing: ' . $media->artist . ' - ' . $media->title . '</div>';
+  else if ($response->data->show_name)
+    $output = '<div class="ob-player-now-playing">Now Playing: ' . $response->data->show_name . '</div>';
+  else
+    $output = '<div class="ob-player-now-playing">Now Playing: Unknown Content</div>';
+
+  return $output;
+}
+

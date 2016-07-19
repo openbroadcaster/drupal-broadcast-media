@@ -1,0 +1,5 @@
+name        = OpenBroadcaster API
+description = Bridge to the OpenBroadcaster API.
+core        = 7.x
+package     = OpenBroadcaster
+version     = 7.x-1.x-dev

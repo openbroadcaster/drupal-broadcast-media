@@ -1,0 +1,229 @@
+// Program nodes
+.node-type-program {
+  .field-name-field-program-timeslot {
+    font-weight: bold;
+  }
+  .field-type-image {
+    margin-bottom: 1em;
+  }
+  .node-program {
+    border-bottom: 1px solid $stone-grey;
+    margin-bottom: 1em;
+  }
+}
+
+// Program listing view
+.view-programs {
+  h2 {
+    margin: 0 0 .5em 0;
+  }
+  .views-field-body {
+    margin-top: .5em;
+  }
+  .views-field-field-program-image {
+    float: right;
+    margin-bottom: 2em;
+    margin-left: 2em;
+  }
+  .views-field-view-node {
+    margin-top: .5em;
+  }
+  .views-row {
+    border-bottom: 1px solid $stone-grey;
+    clear: both;
+    margin-bottom: 1em;
+    min-height: 150px;
+    padding-bottom: 1em;
+  }
+}
+
+// Schedule listing
+.schedule {
+  position: relative;
+}
+.schedule-day-tabs {
+  display: -webkit-flex;
+  display: flex;
+  float: left;
+  margin: 0 0 .5em 0;
+  width: 100%;
+
+  .schedule-day-date {
+    color: rgba($stone-grey, .75);
+    font-size: small;
+    line-height: 1;
+  }
+  h2 {
+    background: $feather-grey;
+    color: $stone-grey;
+    cursor: pointer;
+    -webkit-flex: 1;
+    flex: 1;
+    float: left;
+    font-weight: bold;
+    margin: 0;
+    margin-right: 1%;
+    padding: .25em 0;
+    text-align: center;
+    transition: all .5s;
+    white-space: nowrap;
+    width: 13.2%;
+
+    &.active {
+      cursor: default;
+    }
+
+    &:hover,
+    &.active {
+      background: $stone-grey;
+      color: #fff;
+
+      .schedule-day-date {
+        color: rgba(#fff, .5);
+        font-size: small;
+        line-height: 1;
+      }
+    }
+
+    &.last {
+      margin-right: 0;
+    }
+  }
+}
+.schedule-day {
+  clear: both;
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+.schedule-day-program {
+  @include zen-grid-item-base();
+  @include zen-grid-container();
+  $zen-column-count: 12;
+  $zen-gutter-width: 10px;
+
+  background: $openbroadcaster-blue;
+  border-radius: .5em;
+  color: #fff;
+  margin-bottom: .5em;
+  padding: 1em;
+  position: relative;
+  transition: background 1s;
+
+  &.active {
+    background: $midnight-blue;
+  }
+  &.opened {
+    background: $stone-grey;
+    .program-details {
+      a {
+        border-color: lighten($stone-grey, 20%);
+      }
+    }
+  }
+  img {
+    border: 0;
+  }
+  .program-description,
+  .program-longdesc {
+    font-style: italic;
+
+    a {
+      font-style: normal;
+    }
+  }
+  .program-details {
+    @include zen-grid-item(8, 5);
+
+    a {
+      border-bottom: 1px solid lighten($openbroadcaster-blue, 20%);
+      color: #fff;
+      transition: all .5s;
+
+      &:hover {
+        border-color: #fff;
+        text-decoration: none;
+      }
+    }
+  }
+  .program-host {
+    display: block;
+  }
+  .program-image {
+    @include zen-grid-item(1.5, 3.6);
+    padding-right: .5em;
+  }
+  .program-image-placeholder {
+    background: url("../images/program-placeholder.png") -1px -1px no-repeat;
+    border: 1px solid darken($openbroadcaster-blue, 10%);
+    opacity: .5;
+    height: 62px;
+    width: 62px;
+  }
+  .program-listen {
+    i {
+      cursor: pointer;
+      font-size: large;
+    }
+  }
+  .program-longdesc {
+    p {
+      margin: 1em 0 0 0;
+    }
+  }
+  .program-name {
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .program-time {
+    @include zen-grid-item(2.6, 1);
+  }
+  .program-toggle {
+    cursor: pointer;
+    font-size: x-large;
+    position: absolute;
+    right: .4em;
+    bottom: .1em;
+  }
+}
+@media all and (max-width: 480px) {
+  .schedule-day-tabs {
+    font-family: $condensed;
+  }
+  .schedule-navigation.pinned {
+    display: none;
+  }
+}
+@media all and (min-width: 481px) {
+  .schedule-navigation.pinned {
+    position: absolute;
+    right: 0;
+    top: -3.25em;
+  }
+}
+@media all and (max-width: 935px) {
+  .schedule-day-program {
+    .program-details {
+      @include zen-grid-item(8.25, 4.25);
+    }
+    .program-image {
+      @include zen-grid-item(3.25, 1);
+    }
+    .program-listen {
+      position: absolute;
+      top: 1.25em;
+      right: 1em;
+    }
+    .program-time {
+      border-bottom: 1px solid;
+      clear: both;
+      display: block;
+      float: none !important;
+      margin: 0 0 .5em 0;
+      width: 100% !important;
+    }
+  }
+}

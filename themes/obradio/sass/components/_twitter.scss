@@ -1,0 +1,57 @@
+.twitter-status {
+   background: transparent !important;
+   color: #fff !important;
+   -webkit-font-smoothing: antialiased;
+
+   .actions {
+     margin-top: .25em;
+     text-align: left;
+     visibility: visible;
+
+     a {
+       font-size: .95em;
+       margin-left: 0;
+       margin-right: 1em;
+       padding-bottom: .2em;
+
+       &:hover {
+         border-bottom: 1px solid;
+         text-decoration: none;
+       }
+     }
+   }
+   .avatar {
+     width: 32px;
+   }
+   .name-handle {
+     margin-left: 40px;
+
+     .handle {
+       display: block;
+       font-weight: 600;
+       line-height: 1.2;
+
+       a {
+         font-size: 1em;
+       }
+     }
+   }
+   .text {
+     clear: both;
+     margin-left: 0;
+   }
+   .timestamp {
+     display: block;
+     float: none;
+     line-height: 1.2;
+     margin-left: 40px;
+   }
+}
+.view-twitter-block {
+  .views-row {
+    border-bottom: 1px solid $stone-grey;
+  }
+  .views-row-last {
+    border-bottom: 0;
+  }
+}

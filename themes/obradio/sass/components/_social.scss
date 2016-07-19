@@ -1,0 +1,40 @@
+.block-social {
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+}
+.social-box {
+  color: #fff;
+  display: inline-block;
+  margin-left: .5em;
+  min-height: 1em;
+  min-width: 1.6em;
+  padding: .2em .25em;
+  text-align: center;
+  transition: background .5s;
+  vertical-align: middle;
+
+  &:hover {
+    color: #fff;
+  }
+}
+.social-box-facebook {
+  background: #105aad;
+
+  &:hover {
+    background: lighten(#105aad, 10%);
+  }
+}
+.social-box-google {
+  background: #e35133;
+
+  &:hover {
+    background: lighten(#e35133, 10%);
+  }
+}
+.social-box-twitter {
+  background: #40aef0;
+
+  &:hover {
+    background: lighten(#40aef0, 10%);
+  }
+}

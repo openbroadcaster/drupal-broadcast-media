@@ -1,0 +1,53 @@
+.region-bottom {
+  @include zen-grid-item-base();
+  @include zen-grid-container();
+  $zen-column-count: 5;
+  $zen-gutter-width: 20px;
+
+  .block-menu {
+    @include zen-grid-item(3.5, 1);
+    margin: 0;
+
+    .menu {
+      margin: .5em 0;
+    }
+  }
+  .block-social {
+    @include zen-grid-item(1.5, 1);
+    color: #fff;
+    margin: .5em 0;
+  }
+  .block-search {
+    @include zen-grid-item(1, 1);
+    margin: 0;
+  }
+}
+.link-openbroadcaster {
+  color: $feather-grey;
+  font-size: .8em;
+  margin: .25em 0;
+  text-align: center;
+  a {
+    color: $feather-grey;
+
+    &:hover {
+      color: $link-color;
+    }
+  }
+}
+@media all and (max-width: 670px) {
+  .region-bottom {
+    .block-menu {
+      font-size: 11px;
+      width: 100%;
+
+      a {
+        padding: .25em .5em;
+      }
+      .menu {
+        margin: .5em;
+        padding: 0;
+      }
+    }
+  }
+}

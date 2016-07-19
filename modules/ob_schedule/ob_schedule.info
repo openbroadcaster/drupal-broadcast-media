@@ -1,0 +1,5 @@
+name        = OpenBroadcaster Schedule
+description = Retrieve, store and display the schedule from OpenBroadcaster site.
+core        = 7.x
+package     = OpenBroadcaster
+version     = 7.x-1.x-dev

@@ -1,0 +1,5 @@
+name        = OpenBroadcaster Player
+description = Listen to the live stream from OpenBroadcaster Radio.
+core        = 7.x
+package     = OpenBroadcaster
+version     = 7.x-1.x-dev

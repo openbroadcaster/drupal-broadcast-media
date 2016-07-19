@@ -1,0 +1,50 @@
+<?php
+/**
+ * Implements hook_schema().
+ */
+function ob_schedule_schema() {
+  $schema = array();
+
+  $schema['ob_schedule'] = array(
+    'description' => t('Scheduled shows imported from OpenBroadcaster.'),
+    'fields' => array(
+      'duration' => array(
+        'description' => t('Duration in seconds'),
+        'type'        => 'int',
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+      'start' => array(
+        'description' => t('Start time'),
+        'type'        => 'int',
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+      'name' => array(
+        'description' => t('Name'),
+        'type'        => 'varchar',
+        'length'      => '128',
+        'not null'    => FALSE,
+      ),
+      'description' => array(
+        'description' => t('Description'),
+        'type'        => 'varchar',
+        'length'      => '255',
+        'not null'    => FALSE,
+      ),
+      'owner' => array(
+        'description' => t('OB owner'),
+        'type'        => 'varchar',
+        'length'      => '64',
+        'not null'    => FALSE,
+      ),
+      'stamp' => array(
+        'description' => t('The time the record was inserted.'),
+        'type'        => 'int',
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+    ),
+  );
+  return $schema;
+}

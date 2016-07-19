@@ -1,0 +1,170 @@
+<?php
+/**
+ * Implements hook_block_info().
+ */
+function ob_media_block_info() {
+  $blocks = array();
+
+  $blocks['ob_media_recently_played'] = array(
+    'info'       => t('OpenBroadcaster recently played tracks'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages'      => "recently-played",
+  );
+
+  $blocks['ob_media_recently_updated'] = array(
+    'info'       => t('OpenBroadcaster recently uploaded media'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages'      => "<front>",
+  );
+
+  $blocks['ob_media_used'] = array(
+    'info'       => t('OpenBroadcaster used media'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages'      => "<front>",
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function ob_media_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'ob_media_recently_played' :
+      $block['subject'] = NULL;
+      $block['content'] = ob_media_display_recently_played();
+      break;
+
+    case 'ob_media_recently_updated' :
+      $block['subject'] = NULL;
+      $block['content'] = ob_media_display_recently_updated();
+      break;
+
+    case 'ob_media_used' :
+      $block['subject'] = NULL;
+      $block['content'] = ob_media_display_used();
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function ob_media_views_api() {
+  return array(
+    'api'  => 3,
+    'path' => drupal_get_path('module', 'ob_media') . '/views',
+  );
+}
+
+
+function ob_media_display_recently_played() {
+  $login = ob_api_login();
+  if (!$login)
+    return;
+
+  // Get recently uploaded media
+  $data = array(
+    'i'               => $login->data->id,
+    'k'               => $login->data->key,
+    'device_id'       => variable_get('ob_api_device', '1'),
+    'start_timestamp' => time() - 86400,
+    'end_timestamp'   => time(),
+    'orderby'         => 'timestamp',
+    'orderdesc'       => 1
+  );
+  $response = json_decode(ob_api_request('Device', 'monitor_search', $data));
+
+  global $language;
+  $date_format = system_date_format_locale($language->language);
+  $date_format = $date_format ? $date_format : 'G:i M d';
+
+  $output = '<table class="ob-table ob-media-recently-played">';
+  foreach ($response->data->results as $media) {
+    $output .= '<tr><td>' . $media->artist . '</td><td>' . $media->title . '</td><td style="white-space: nowrap;">' . date($date_format, $media->timestamp) . '</td></tr>';
+  }
+  $output .= '</table>';
+
+  return $output;
+}
+
+
+function ob_media_display_recently_updated() {
+  $login = ob_api_login();
+  if (!$login)
+    return;
+
+  // Get recently uploaded media
+  $data = array(
+    'i'        => $login->data->id,
+    'k'        => $login->data->key,
+    'device'   => variable_get('ob_api_device', '1'),
+    'q'        => array('mode' => 'simple', 'string' => ''),
+    'l'        => 100,
+    'o'        => 0,
+    'sort_by'  => 'updated',
+    'sort_dir' => 'desc'
+  );
+  $media = json_decode(ob_api_request('Media', 'media_search', $data));
+
+  global $language;
+  $date_format = system_date_format_locale($language->language);
+  $date_format = $date_format ? $date_format : 'G:i M d';
+
+  $output = '<table class="ob-table ob-media-recently-updated">';
+  foreach ($media->data->media as $item) {
+    //$output .= print_r($item);
+    $output .= '<tr><td>' . $item->artist . '</td><td>' . $item->title . '</td><td>' . date($date_format, $item->updated) . '</td></tr>';
+  }
+  $output .= '</table>';
+
+  return $output;
+}
+
+// this wont work because we need to somehow get the media item id to search for
+function ob_media_display_used() {
+  $login = ob_api_login();
+  if (!$login)
+    return;
+
+  $data = array(
+    'i'        => $login->data->id,
+    'k'        => $login->data->key,
+    'id'       => variable_get('ob_api_device', '1'),
+    'q'        => array('mode' => 'simple', 'string' => ''),
+    'l'        => 100,
+    'o'        => 0,
+    'sort_by'  => 'updated',
+    'sort_dir' => 'desc'
+  );
+  $media = json_decode(ob_api_request('Media', 'used', $data));
+
+  $output = '<table class="ob-table ob-media-recently-used">';
+
+/*
+  // TODO not working yet
+  foreach ($media->data->media as $item) {
+    //$output .= print_r($item);
+    $output .= '<tr><td>' . $item->artist . '</td><td>' . $item->title . '</td><td>' . date('r', $item->updated) . '</td></tr>';
+  }
+*/
+
+  $output .= '</table>';
+
+  return $output;
+}
+
+

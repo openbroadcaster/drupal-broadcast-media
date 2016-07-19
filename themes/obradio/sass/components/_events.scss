@@ -1,0 +1,57 @@
+// Event nodes
+.node-type-event {
+  .field-label {
+    width: 5em;
+  }
+  .field-type-image {
+    margin-bottom: 1em;
+  }
+  .node-event {
+    border-bottom: 1px solid $stone-grey;
+    margin-bottom: 1em;
+  }
+}
+
+// Event listing view
+.view-events {
+  h2 {
+    margin: 0 0 .5em 0;
+  }
+  .views-field-field-event-date {
+    margin-bottom: .5em;
+  }
+  .views-field-field-event-image {
+    float: right;
+    margin-bottom: 2em;
+    margin-left: 2em;
+  }
+  .views-field-view-node {
+    margin-top: .5em;
+  }
+  .views-row {
+    border-bottom: 1px solid $stone-grey;
+    clear: both;
+    margin-bottom: 1em;
+    min-height: 150px;
+    padding-bottom: 1em;
+  }
+}
+
+// Upcoming event view/block
+.view-upcoming-event {
+  margin-top: .5em;
+
+  .views-field-field-event-date {
+    font-size: .9em;
+    line-height: 1;
+    margin-top: .25em;
+
+    .date-display-end {
+      display: block;
+    }
+  }
+  .views-field-title {
+    line-height: 1;
+    text-transform: uppercase;
+  }
+}

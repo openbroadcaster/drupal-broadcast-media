@@ -1,0 +1,38 @@
+// *:focus {
+//   outline: none;
+// }
+a {
+  color: $link-color;
+  text-decoration: none;
+  transition: color .5s;
+
+  &:hover {
+    color: $link-hover-color;
+    text-decoration: underline;
+  }
+}
+body {
+  background-color: $near-black;
+}
+#{headings(all)} {
+  font-weight: normal;
+  text-transform: uppercase;
+}
+label {
+  font-weight: normal;
+}
+.align-center {
+  text-align: center;
+}
+.align-left {
+  text-align: left;
+}
+.align-right {
+  text-align: right;
+}
+.condensed {
+  font-family: $condensed;
+}
+.page__title {
+  margin-bottom: 1em;
+}
