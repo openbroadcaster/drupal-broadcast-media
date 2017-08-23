@@ -14,13 +14,13 @@ function ob_media_block_info() {
     'pages'      => "recently-played",
   );
 
-  $blocks['ob_media_recently_updated'] = array(
+  $blocks['ob_media_recently_uploaded'] = array(
     'info'       => t('OpenBroadcaster recently uploaded media'),
     'cache'      => DRUPAL_CACHE_PER_PAGE,
     'status'     => 1,
     'region'     => 'content',
     'visibility' => BLOCK_VISIBILITY_LISTED,
-    'pages'      => "<front>",
+    'pages'      => "recently-uploaded",
   );
 
   $blocks['ob_media_used'] = array(
@@ -29,8 +29,18 @@ function ob_media_block_info() {
     'status'     => 1,
     'region'     => 'content',
     'visibility' => BLOCK_VISIBILITY_LISTED,
-    'pages'      => "<front>",
+    'pages'      => "recently-used",
   );
+
+  $blocks['ob_media_download_media'] = array(
+    'info'       => t('OpenBroadcaster downloadable media list'),
+    'cache'      => DRUPAL_CACHE_PER_PAGE,
+    'status'     => 1,
+    'region'     => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages'      => "download-media",
+  );
+
   return $blocks;
 }
 
@@ -46,26 +56,32 @@ function ob_media_block_view($delta = '') {
       $block['content'] = ob_media_display_recently_played();
       break;
 
-    case 'ob_media_recently_updated' :
+    case 'ob_media_recently_uploaded' :
       $block['subject'] = NULL;
-      $block['content'] = ob_media_display_recently_updated();
+      $block['content'] = ob_media_display_recently_uploaded();
       break;
 
     case 'ob_media_used' :
       $block['subject'] = NULL;
       $block['content'] = ob_media_display_used();
       break;
+
+    case 'ob_media_download_media' :
+      $block['subject'] = NULL;
+      $block['content'] = ob_media_display_download_media();
+      break;
   }
 
   return $block;
 }
+
 
 /**
  * Implements hook_views_api().
  */
 function ob_media_views_api() {
   return array(
-    'api'  => 3,
+    'api'  => 3.0,
     'path' => drupal_get_path('module', 'ob_media') . '/views',
   );
 }
@@ -102,7 +118,7 @@ function ob_media_display_recently_played() {
 }
 
 
-function ob_media_display_recently_updated() {
+function ob_media_display_recently_uploaded() {
   $login = ob_api_login();
   if (!$login)
     return;
@@ -163,6 +179,63 @@ function ob_media_display_used() {
 */
 
   $output .= '</table>';
+
+  return $output;
+}
+
+function ob_media_display_download_media() {
+  $login = ob_api_login();
+  if (!$login)
+    return;
+
+  $filters = array( array('filter' => 'is_copyright_owner', 'op' => 'is', 'val' => 1) );
+  if (isset($_GET['artist']))
+    $filters[] = array('filter' => 'artist', 'op' => 'is', 'val' => $_GET['artist']);
+
+  // Get data
+  $data = array(
+    'i'        => $login->data->id,
+    'k'        => $login->data->key,
+    'device'   => variable_get('ob_api_device', '1'),
+    'q'        => array('mode' => 'advanced', 'filters' => $filters),
+    'l'        => 100,
+    'o'        => 0,
+    'sort_by'  => 'updated',
+    'sort_dir' => 'desc'
+  );
+  $media = json_decode(ob_api_request('Media', 'media_search', $data));
+
+  global $language;
+  $date_format = system_date_format_locale($language->language);
+  $date_format = $date_format ? $date_format : 'G:i M d';
+
+  $items = $media->data->media;
+  usort($items, function($a, $b) {
+    $ret = strnatcmp($a->artist, $b->artist);
+    if (!$ret) $ret = strnatcmp($a->title, $b->title);
+    return $ret;
+  });
+
+  $artists = array();
+  foreach ($items as $item) {
+    if (!isset($artists[$item->artist]))
+      $artists[$item->artist] = array();
+    $artists[$item->artist][] = $item;
+  }
+
+  $artisturl = http_build_query($_GET);
+  $downloadurl = rtrim(variable_get('ob_api_url', 'http://'), '/') . '/download.php';
+
+  $output = '<ul class="ob-media-downloads">';
+  foreach ($artists as $tracks) {
+    $output .= '<li><h3><a href="?' . $artisturl . '&artist=' . $tracks[0]->artist . '">' . $tracks[0]->artist . '</a></h3>';
+    $output .= '<ul>';
+    foreach ($tracks as $item) {
+      $output .= '<li><a href="' . $downloadurl . '?media_id=' . $item->id . '">' . $item->title . '</a></li>';
+    }
+    $output .= '</ul></li>';
+  }
+  $output .= '</ul>';
 
   return $output;
 }
