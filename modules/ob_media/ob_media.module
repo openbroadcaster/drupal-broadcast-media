@@ -191,6 +191,8 @@ function ob_media_display_download_media() {
   $filters = array( array('filter' => 'is_copyright_owner', 'op' => 'is', 'val' => 1) );
   if (isset($_GET['artist']))
     $filters[] = array('filter' => 'artist', 'op' => 'is', 'val' => $_GET['artist']);
+  if (isset($_GET['category']))
+    $filters[] = array('filter' => 'category', 'op' => 'is', 'val' => $_GET['category']);
 
   // Get data
   $data = array(
@@ -231,7 +233,10 @@ function ob_media_display_download_media() {
     $output .= '<li><h3><a href="?' . $artisturl . '&artist=' . $tracks[0]->artist . '">' . $tracks[0]->artist . '</a></h3>';
     $output .= '<ul>';
     foreach ($tracks as $item) {
-      $output .= '<li><a href="' . $downloadurl . '?media_id=' . $item->id . '">' . $item->title . '</a></li>';
+      $output .= '<li style="overflow: hidden;"><a href="' . $downloadurl . '?media_id=' . $item->id . '">' . $item->title . '</a>';
+      if ($item->type == 'audio')
+        $output .= '<span style="float: right;"><audio controls preload="none" style="width: 140px;"><source src=' . $downloadurl . '?media_id=' . $item->id . '" type="' . $item->type . '/' . $item->format . '"></audio></span>';
+      $output .= '</li>';
     }
     $output .= '</ul></li>';
   }

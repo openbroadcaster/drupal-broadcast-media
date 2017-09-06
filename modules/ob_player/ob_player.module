@@ -121,12 +121,12 @@ function ob_track_info() {
   echo ob_api_request('Device', 'now_playing', array('id' => variable_get('ob_api_device', '1')));
 }
 
-function ob_player_display_now_playing() {
-  return '<div class="ob-player-now-playing">Now Playing: <span class="track">Updating...</span></div>';
-  #<a class="recent" href="'.base_path().'recently-played">(Recently Played)</a>
-}
+//function ob_player_display_now_playing() {
+//  return '<div class="ob-player-now-playing">Now Playing: <span class="track">Updating...</span></div>';
+//  #<a class="recent" href="'.base_path().'recently-played">(Recently Played)</a>
+//}
 
-function ob_player_display_now_playing_old() {
+function ob_player_display_now_playing() {
   // Log in
 /*
   $data = array(
@@ -145,7 +145,7 @@ function ob_player_display_now_playing_old() {
   $response = json_decode(ob_api_request('Device', 'now_playing', $data));
 
   $media = $response->data->media;
-  drupal_set_message(print_r($response->data, true));
+  //drupal_set_message(print_r($response->data, true));
   if ($media->artist || $media->title)
     $output = '<div class="ob-player-now-playing">Now Playing: ' . $media->artist . ' - ' . $media->title . '</div>';
   else if ($response->data->show_name)
