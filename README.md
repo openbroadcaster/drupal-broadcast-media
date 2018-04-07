@@ -1,6 +1,6 @@
-# DrupalRadio
+# Drupal Broadcaster Media
 
-Drupal Radio Modules and Theme template to display API metadata  
+Drupal Broadcat Media Modules and Theme template to display API metadata  
 
 ## API Bridge
 
