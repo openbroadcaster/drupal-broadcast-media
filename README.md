@@ -1,4 +1,4 @@
-# Drupal Broadcaster Media
+# Drupal Broadcast Media
 
 Drupal Broadcat Media Modules and Theme template to display API metadata  
 
