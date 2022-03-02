@@ -2,7 +2,7 @@
 
 Drupal 7.0 Broadcast Media Modules and Theme template to display API metadata
 
-__Note This is coming to EOL support to be replaced with generic API embed code maintaing and increasing these plugins' functionality. HELP WANTED if anyone wishes to take over or maintain this repo for DRUPAL 8.0
+__Note This is coming to EOL support to be replaced with generic API embed code maintaing and increasing these plugins' functionality. HELP WANTED if anyone wishes to take over or maintain this repo for DRUPAL 8.0__
 
 ## API Bridge
 
